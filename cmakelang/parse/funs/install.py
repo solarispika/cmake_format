@@ -139,7 +139,7 @@ def parse_install_targets(ctx, tokens, breakstack):
     word = get_normalized_kwarg(tokens[0])
     if word in designated_kwargs:
       subtree = KeywordGroupNode.parse(
-          ctx, tokens, word, parse_install_targets, subtree_breakstack)
+          ctx, tokens, word, parse_install_targets_sub, subtree_breakstack)
     elif word in kwargs:
       subtree = KeywordGroupNode.parse(
           ctx, tokens, word, kwargs[word], kwarg_breakstack)
