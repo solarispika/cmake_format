@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cmakelang"
+dynamic = ["version"]
+description = "Language tools for cmake (format, lint, etc)"
+readme = "cmakelang/doc/README.rst"
+license = {text = "GPLv3"}
+authors = [
+    {name = "Josh Bialkowski", email = "josh.bialkowski@gmail.com"}
+]
+keywords = ["cmake", "format"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+requires-python = ">=3.8"
+dependencies = ["six>=1.13.0"]
+
+[project.optional-dependencies]
+YAML = ["pyyaml>=5.3"]
+html-gen = ["jinja2>=2.10.3"]
+
+[project.scripts]
+cmake-annotate = "cmakelang.annotate:main"
+cmake-format = "cmakelang.format.__main__:main"
+cmake-lint = "cmakelang.lint.__main__:main"
+cmake-genparsers = "cmakelang.genparsers:main"
+ctest-to = "cmakelang.ctest_to:main"
+
+[project.urls]
+Homepage = "https://github.com/cheshirekow/cmakelang"
+
+[tool.setuptools.dynamic]
+version = {attr = "cmakelang.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["cmakelang*"]
+
+[tool.setuptools.package-data]
+cmakelang = ["templates/*"]
