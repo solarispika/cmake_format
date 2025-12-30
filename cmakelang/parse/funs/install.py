@@ -5,7 +5,7 @@ from cmakelang.parse.common import KwargBreaker
 from cmakelang.parse.simple_nodes import CommentNode
 from cmakelang.parse.argument_nodes import (
     KeywordGroupNode, PositionalGroupNode, PositionalParser, StandardArgTree)
-from cmakelang.parse.additional_nodes import PatternNode
+from cmakelang.parse.additional_nodes import FileSetNode, PatternNode
 from cmakelang.parse.util import (
     WHITESPACE_TOKENS,
     get_first_semantic_token,
@@ -40,13 +40,38 @@ def parse_install_targets_sub(ctx, tokens, breakstack):
       breakstack=breakstack)
 
 
+def parse_install_file_set_sub(ctx, tokens, breakstack):
+  """
+    Parse the inner kwargs of an ``install(TARGETS ... FILE_SET)`` command.
+    FILE_SET requires a set name followed by optional destination kwargs.
+  :see: https://cmake.org/cmake/help/latest/command/install.html#targets
+  """
+  return StandardArgTree.parse(
+      ctx, tokens,
+      npargs=1,  # The file set name
+      kwargs={
+          "DESTINATION": PositionalParser(1),
+          "PERMISSIONS": PositionalParser('+'),
+          "CONFIGURATIONS": PositionalParser('+'),
+          "COMPONENT": PositionalParser(1),
+          "NAMELINK_COMPONENT": PositionalParser(1),
+      },
+      flags=[
+          "OPTIONAL",
+          "EXCLUDE_FROM_ALL",
+          "NAMELINK_ONLY",
+          "NAMELINK_SKIP"
+      ],
+      breakstack=breakstack)
+
+
 def parse_install_targets(ctx, tokens, breakstack):
   """
   ::
 
     install(TARGETS targets... [EXPORT <export-name>]
             [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE]
+              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set>]
              [DESTINATION <dir>]
              [PERMISSIONS permissions...]
              [CONFIGURATIONS [Debug|Release|...]]
@@ -58,7 +83,7 @@ def parse_install_targets(ctx, tokens, breakstack):
             [INCLUDES DESTINATION [<dir> ...]]
             )
 
-  :see: https://cmake.org/cmake/help/v3.14/command/install.html#targets
+  :see: https://cmake.org/cmake/help/latest/command/install.html#targets
   """
   kwargs = {
       "TARGETS": PositionalParser('+'),
@@ -79,7 +104,8 @@ def parse_install_targets(ctx, tokens, breakstack):
   )
   designated_kwargs = (
       "ARCHIVE", "LIBRARY", "RUNTIME", "OBJECTS", "FRAMEWORK",
-      "BUNDLE", "PRIVATE_HEADER", "PUBLIC_HEADER", "RESOURCE"
+      "BUNDLE", "PRIVATE_HEADER", "PUBLIC_HEADER", "RESOURCE",
+      "FILE_SET"
   )
 
   # NOTE(josh): from here on, code is essentially StandardArgTree.parse(),
@@ -138,8 +164,13 @@ def parse_install_targets(ctx, tokens, breakstack):
     # just make sure we check flags first.
     word = get_normalized_kwarg(tokens[0])
     if word in designated_kwargs:
-      subtree = KeywordGroupNode.parse(
-          ctx, tokens, word, parse_install_targets_sub, subtree_breakstack)
+      # FILE_SET requires a set name argument, so use a different subparser
+      if word == "FILE_SET":
+        subtree = KeywordGroupNode.parse(
+            ctx, tokens, word, parse_install_file_set_sub, subtree_breakstack)
+      else:
+        subtree = KeywordGroupNode.parse(
+            ctx, tokens, word, parse_install_targets_sub, subtree_breakstack)
     elif word in kwargs:
       subtree = KeywordGroupNode.parse(
           ctx, tokens, word, kwargs[word], kwarg_breakstack)

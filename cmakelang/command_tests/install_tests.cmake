@@ -92,3 +92,16 @@ install(
   TARGETS target #
   CONFIGURATIONS Debug
   RUNTIME DESTINATION Debug/bin)
+
+# test: install_file_set
+install(TARGETS mylib FILE_SET myheaders DESTINATION include/mylib)
+
+# test: install_file_set_with_component
+install(
+  TARGETS mylib
+  FILE_SET HEADERS
+           DESTINATION include
+           COMPONENT Development
+  FILE_SET mymodules
+           DESTINATION lib/cmake
+           COMPONENT Development)
