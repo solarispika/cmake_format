@@ -70,6 +70,7 @@ def parse_install_targets(ctx, tokens, breakstack):
   ::
 
     install(TARGETS targets... [EXPORT <export-name>]
+            [RUNTIME_DEPENDENCIES <arg>...|RUNTIME_DEPENDENCY_SET <set-name>]
             [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
               PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set>]
              [DESTINATION <dir>]
@@ -88,6 +89,8 @@ def parse_install_targets(ctx, tokens, breakstack):
   kwargs = {
       "TARGETS": PositionalParser('+'),
       "EXPORT": PositionalParser(1),
+      "RUNTIME_DEPENDENCY_SET": PositionalParser(1),
+      "RUNTIME_DEPENDENCIES": parse_install_runtime_dependencies_sub,
       "INCLUDES": PositionalParser('+', flags=["DESTINATION"]),
       # Common kwargs
       "DESTINATION": PositionalParser(1),
@@ -311,6 +314,73 @@ def parse_install_export(ctx, tokens, breakstack):
       breakstack=breakstack)
 
 
+def parse_install_runtime_dependencies_sub(ctx, tokens, breakstack):
+  """
+  Parse the inner kwargs of ``RUNTIME_DEPENDENCIES`` within install(TARGETS).
+  These are the filtering options for runtime dependency resolution.
+
+  :see: https://cmake.org/cmake/help/latest/command/install.html#targets
+  """
+  return StandardArgTree.parse(
+      ctx, tokens,
+      npargs='*',
+      kwargs={
+          "PRE_INCLUDE_REGEXES": PositionalParser('+'),
+          "PRE_EXCLUDE_REGEXES": PositionalParser('+'),
+          "POST_INCLUDE_REGEXES": PositionalParser('+'),
+          "POST_EXCLUDE_REGEXES": PositionalParser('+'),
+          "POST_INCLUDE_FILES": PositionalParser('+'),
+          "POST_EXCLUDE_FILES": PositionalParser('+'),
+          "DIRECTORIES": PositionalParser('+'),
+      },
+      flags=[],
+      breakstack=breakstack)
+
+
+def parse_install_runtime_dependency_set(ctx, tokens, breakstack):
+  """
+  ::
+
+    install(RUNTIME_DEPENDENCY_SET <set-name>
+            [[LIBRARY|RUNTIME|FRAMEWORK]
+             [DESTINATION <dir>]
+             [PERMISSIONS permissions...]
+             [CONFIGURATIONS [Debug|Release|...]]
+             [COMPONENT <component>]
+             [NAMELINK_COMPONENT <component>]
+             [OPTIONAL] [EXCLUDE_FROM_ALL]
+            ] [...]
+            [PRE_INCLUDE_REGEXES regex...]
+            [PRE_EXCLUDE_REGEXES regex...]
+            [POST_INCLUDE_REGEXES regex...]
+            [POST_EXCLUDE_REGEXES regex...]
+            [POST_INCLUDE_FILES file...]
+            [POST_EXCLUDE_FILES file...]
+            [DIRECTORIES dir...]
+            )
+
+  :see: https://cmake.org/cmake/help/latest/command/install.html#runtime-dependency-set
+  """
+  return StandardArgTree.parse(
+      ctx, tokens,
+      npargs='*',
+      kwargs={
+          "RUNTIME_DEPENDENCY_SET": PositionalParser(1),
+          "LIBRARY": parse_install_targets_sub,
+          "RUNTIME": parse_install_targets_sub,
+          "FRAMEWORK": parse_install_targets_sub,
+          "PRE_INCLUDE_REGEXES": PositionalParser('+'),
+          "PRE_EXCLUDE_REGEXES": PositionalParser('+'),
+          "POST_INCLUDE_REGEXES": PositionalParser('+'),
+          "POST_EXCLUDE_REGEXES": PositionalParser('+'),
+          "POST_INCLUDE_FILES": PositionalParser('+'),
+          "POST_EXCLUDE_FILES": PositionalParser('+'),
+          "DIRECTORIES": PositionalParser('+'),
+      },
+      flags=[],
+      breakstack=breakstack)
+
+
 def parse_install(ctx, tokens, breakstack):
   """
   The ``install()`` command has multiple different forms, implemented
@@ -323,8 +393,9 @@ def parse_install(ctx, tokens, breakstack):
   * SCRIPT
   * CODE
   * EXPORT
+  * RUNTIME_DEPENDENCY_SET
 
-  :see: https://cmake.org/cmake/help/v3.0/command/install.html
+  :see: https://cmake.org/cmake/help/latest/command/install.html
   """
 
   descriminator_token = get_first_semantic_token(tokens)
@@ -341,7 +412,8 @@ def parse_install(ctx, tokens, breakstack):
       "DIRECTORY": parse_install_directory,
       "SCRIPT": parse_install_script,
       "CODE": parse_install_script,
-      "EXPORT": parse_install_export
+      "EXPORT": parse_install_export,
+      "RUNTIME_DEPENDENCY_SET": parse_install_runtime_dependency_set,
   }
   if descriminator not in parsemap:
     logger.warning("Invalid install form \"%s\" at %s", descriminator,

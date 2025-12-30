@@ -533,7 +533,7 @@ class TestInstall(TestBase):
   """
   Test various examples of the install command
   """
-  kExpectNumSidecarTests = 5
+  kExpectNumSidecarTests = 8
 
 
 class TestSetTargetProperties(TestBase):
