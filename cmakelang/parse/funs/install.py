@@ -72,7 +72,8 @@ def parse_install_targets(ctx, tokens, breakstack):
     install(TARGETS targets... [EXPORT <export-name>]
             [RUNTIME_DEPENDENCIES <arg>...|RUNTIME_DEPENDENCY_SET <set-name>]
             [[ARCHIVE|LIBRARY|RUNTIME|OBJECTS|FRAMEWORK|BUNDLE|
-              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|FILE_SET <set>]
+              PRIVATE_HEADER|PUBLIC_HEADER|RESOURCE|
+              FILE_SET <set>|CXX_MODULES_BMI]
              [DESTINATION <dir>]
              [PERMISSIONS permissions...]
              [CONFIGURATIONS [Debug|Release|...]]
@@ -108,7 +109,7 @@ def parse_install_targets(ctx, tokens, breakstack):
   designated_kwargs = (
       "ARCHIVE", "LIBRARY", "RUNTIME", "OBJECTS", "FRAMEWORK",
       "BUNDLE", "PRIVATE_HEADER", "PUBLIC_HEADER", "RESOURCE",
-      "FILE_SET"
+      "FILE_SET", "CXX_MODULES_BMI"
   )
 
   # NOTE(josh): from here on, code is essentially StandardArgTree.parse(),

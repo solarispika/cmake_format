@@ -129,3 +129,9 @@ install(
     POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
     DIRECTORIES ${CMAKE_INSTALL_PREFIX}/bin
   RUNTIME DESTINATION bin)
+
+# test: install_cxx_modules_bmi
+install(
+  TARGETS mymodule
+  FILE_SET CXX_MODULES DESTINATION lib/cxx/miu
+  CXX_MODULES_BMI DESTINATION lib/cxx/bmi COMPONENT Development)
