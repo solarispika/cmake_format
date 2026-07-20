@@ -925,3 +925,19 @@ target_sources(
            BASE_DIRS include
            FILES include/mylib.h
   INTERFACE some_interface.h)
+
+# test: protobuf_generate_cpp_lang
+protobuf_generate(
+  TARGET iconUpdater_grpc_proto
+  LANGUAGE cpp
+  PROTOS "${proto}"
+  IMPORT_DIRS "${proto_path}")
+
+# test: protobuf_generate_grpc_plugin
+protobuf_generate(
+  TARGET iconUpdater_grpc_proto
+  LANGUAGE grpc
+  GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
+  PLUGIN "protoc-gen-grpc=${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+  PROTOS "${proto}"
+  IMPORT_DIRS "${proto_path}")

@@ -15,7 +15,7 @@ class TestMiscFormatting(TestBase):
   """
   Ensure that various inputs format the way we want them to
   """
-  kExpectNumSidecarTests = 89
+  kExpectNumSidecarTests = 91
 
   def test_config_hashruler_minlength(self):
 

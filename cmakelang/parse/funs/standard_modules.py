@@ -1601,6 +1601,29 @@ FUNSPECS = {
     },
     "spelling": "ProcessorCount"
   },
+  "protobuf_generate": {
+    "kwargs": {
+      "DEPENDENCIES": "+",
+      "EXPORT_MACRO": 1,
+      "GENERATE_EXTENSIONS": "+",
+      "IMPORT_DIRS": "+",
+      "LANGUAGE": 1,
+      "OUT_VAR": 1,
+      "PLUGIN": 1,
+      "PLUGIN_OPTIONS": 1,
+      "PROTOC_EXE": 1,
+      "PROTOC_OPTIONS": "+",
+      "PROTOC_OUT_DIR": 1,
+      "PROTOS": "+",
+      "TARGET": 1
+    },
+    "pargs": {
+      "flags": [
+        "APPEND_PATH"
+      ],
+      "nargs": 0
+    }
+  },
   "protobuf_generate_cpp": {
     "kwargs": {
       "DESCRIPTORS": 1,
